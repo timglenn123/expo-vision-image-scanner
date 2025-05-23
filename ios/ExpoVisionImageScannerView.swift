@@ -1,38 +1,71 @@
 import ExpoModulesCore
-import WebKit
+import VisionKit
 
-// This view will be used as a native component. Make sure to inherit from `ExpoView`
-// to apply the proper styling (e.g. border radius and shadows).
-class ExpoVisionImageScannerView: ExpoView {
-  let webView = WKWebView()
-  let onLoad = EventDispatcher()
-  var delegate: WebViewDelegate?
-
-  required init(appContext: AppContext? = nil) {
-    super.init(appContext: appContext)
-    clipsToBounds = true
-    delegate = WebViewDelegate { url in
-      self.onLoad(["url": url])
+class ExpoVisionImageScannerView: ExpoView, VNDocumentCameraViewControllerDelegate {
+    required init(appContext: AppContext? = nil) {
+        super.init(appContext: appContext)
+        clipsToBounds = true
+        presentDocumentScanner()
     }
-    webView.navigationDelegate = delegate
-    addSubview(webView)
-  }
+    
+    let onScan = EventDispatcher()
+    
+    var isEnabled = true;
+    
+    private func presentDocumentScanner() {
+        guard let topViewController = UIApplication.shared.keyWindow?.rootViewController else {
+            print("Unable to access root view controller.")
+            return
+        }
 
-  override func layoutSubviews() {
-    webView.frame = bounds
-  }
-}
-
-class WebViewDelegate: NSObject, WKNavigationDelegate {
-  let onUrlChange: (String) -> Void
-
-  init(onUrlChange: @escaping (String) -> Void) {
-    self.onUrlChange = onUrlChange
-  }
-
-  func webView(_ webView: WKWebView, didFinish navigation: WKNavigation) {
-    if let url = webView.url {
-      onUrlChange(url.absoluteString)
+        let documentCameraViewController = VNDocumentCameraViewController()
+        documentCameraViewController.delegate = self
+        topViewController.present(documentCameraViewController, animated: true, completion: nil)
     }
-  }
+    
+    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+        controller.dismiss(animated: true, completion: nil)
+        var scannedItems: [[String: Any]] = []
+        
+        if(scan.pageCount==1){
+            let scannedImage = scan.imageOfPage(at: 0)
+            scannedItems.append([
+                "imageUri": scannedImage.pngData()?.base64EncodedString() ?? "",
+                "pageIndex": 0
+            ])
+            sendEvent(scannedItems)
+        }else{
+            for pageIndex in 0..<scan.pageCount {
+                let scannedImage = scan.imageOfPage(at: pageIndex)
+                // Append the scanned image data to the array
+                scannedItems.append([
+                    "imageUri": scannedImage.pngData()?.base64EncodedString() ?? "",
+                    "pageIndex": pageIndex
+                ])
+            }
+            sendEvent(scannedItems)
+        }
+    }
+    
+    func sendEvent(_ scannedItems: [[String: Any]]) {
+        // Convert to JSON and pass it to onScan
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: scannedItems, options: .prettyPrinted)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                onScan(["data": jsonString])
+            }
+        } catch {
+            print("Error serializing JSON: \(error)")
+        }
+    }
+    
+    func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+        controller.dismiss(animated: true, completion: nil)
+        print("Document scanning canceled.")
+    }
+    
+    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
+        controller.dismiss(animated: true, completion: nil)
+        print("Document scanning failed with error: \(error.localizedDescription)")
+    }
 }

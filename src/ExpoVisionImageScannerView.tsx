@@ -2,8 +2,13 @@ import { ViewProps } from 'react-native';
 import { requireNativeViewManager } from 'expo-modules-core';
 import * as React from 'react';
 
+export type OnScanEvent = {
+  data: string;
+};
+
 export type Props = {
-  url?: string;
+  onScan?: (event: { nativeEvent: OnScanEvent }) => void;
+
 } & ViewProps;
 
 const NativeView: React.ComponentType<Props> = requireNativeViewManager('ExpoVisionImageScannerView');
