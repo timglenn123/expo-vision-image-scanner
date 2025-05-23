@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-vision-image-scanner": ["../src/index"],
+      "expo-vision-image-scanner/*": ["../src/*"]
+    }
+  }
+}
