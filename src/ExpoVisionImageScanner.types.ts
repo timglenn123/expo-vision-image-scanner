@@ -14,6 +14,6 @@ export type ChangeEventPayload = {
 
 export type ExpoVisionImageScannerViewProps = {
   url: string;
-  onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
+  //onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
   style?: StyleProp<ViewStyle>;
 };

@@ -1,11 +1,13 @@
-import { requireNativeView } from 'expo';
+import { ViewProps } from 'react-native';
+import { requireNativeViewManager } from 'expo-modules-core';
 import * as React from 'react';
 
-import { ExpoVisionImageScannerViewProps } from './ExpoVisionImageScanner.types';
+export type Props = {
+  url?: string;
+} & ViewProps;
 
-const NativeView: React.ComponentType<ExpoVisionImageScannerViewProps> =
-  requireNativeView('ExpoVisionImageScanner');
+const NativeView: React.ComponentType<Props> = requireNativeViewManager('ExpoVisionImageScannerView');
 
-export default function ExpoVisionImageScannerView(props: ExpoVisionImageScannerViewProps) {
+export default function ExpoVisionImageScannerView(props: Props) {
   return <NativeView {...props} />;
 }

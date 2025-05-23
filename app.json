@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.timglenn123.expovisionimagescanner"
+  },
+  "ios": {
+    "bundleIdentifier": "com.timglenn123.expovisionimagescanner"
+  }
+}
