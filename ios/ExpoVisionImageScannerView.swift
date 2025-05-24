@@ -1,53 +1,46 @@
 import ExpoModulesCore
 import VisionKit
 
-class ExpoVisionImageScannerView: ExpoView, VNDocumentCameraViewControllerDelegate {
+class ExpoVisionImageScannerView: ExpoView, ExpoVisionImageScannerDelegate {
+    // Make this weak to avoid retain cycle
+    private weak var documentCameraViewController: ExpoVisionImageScannerController?
+    let onScan = EventDispatcher()
+    var isEnabled = true
     required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)
         clipsToBounds = true
         presentDocumentScanner()
     }
     
-    let onScan = EventDispatcher()
-    
-    var isEnabled = true;
+    // Clean up when view is removed
+    deinit {
+        documentCameraViewController?.delegate = nil
+    }
     
     private func presentDocumentScanner() {
         guard let topViewController = UIApplication.shared.keyWindow?.rootViewController else {
             print("Unable to access root view controller.")
             return
         }
-
-        let documentCameraViewController = VNDocumentCameraViewController()
+        
+        let documentCameraViewController = ExpoVisionImageScannerController()
         documentCameraViewController.delegate = self
+        self.documentCameraViewController = documentCameraViewController
         topViewController.present(documentCameraViewController, animated: true, completion: nil)
     }
     
-    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
-        controller.dismiss(animated: true, completion: nil)
+    func documentScanner(_ scanner: UIViewController, didScanDocuments images: [UIImage]){
+        scanner.dismiss(animated: true)
         var scannedItems: [[String: Any]] = []
-        
-        if(scan.pageCount==1){
-            let scannedImage = scan.imageOfPage(at: 0)
-            scannedItems.append([
-                "imageUri": scannedImage.pngData()?.base64EncodedString() ?? "",
-                "pageIndex": 0
-            ])
-            sendEvent(scannedItems)
-        }else{
-            for pageIndex in 0..<scan.pageCount {
-                let scannedImage = scan.imageOfPage(at: pageIndex)
-                // Append the scanned image data to the array
-                scannedItems.append([
-                    "imageUri": scannedImage.pngData()?.base64EncodedString() ?? "",
-                    "pageIndex": pageIndex
-                ])
-            }
-            sendEvent(scannedItems)
-        }
+        scannedItems.append([
+            "imageUri": images[0].pngData()?.base64EncodedString() ?? "",
+            "pageIndex": 0
+        ])
+        sendEvent(scannedItems)
     }
     
     func sendEvent(_ scannedItems: [[String: Any]]) {
+        
         // Convert to JSON and pass it to onScan
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: scannedItems, options: .prettyPrinted)
@@ -59,13 +52,13 @@ class ExpoVisionImageScannerView: ExpoView, VNDocumentCameraViewControllerDelega
         }
     }
     
-    func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
-        controller.dismiss(animated: true, completion: nil)
-        print("Document scanning canceled.")
-    }
-    
-    func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFailWithError error: Error) {
-        controller.dismiss(animated: true, completion: nil)
-        print("Document scanning failed with error: \(error.localizedDescription)")
-    }
+    func documentScannerDidCancel(_ scanner: UIViewController){
+scanner.dismiss(animated: true)
+    print("Document scanning canceled.")
+}
+
+    func documentCameraViewController(_ scanner: UIViewController, didFailWithError error: Error) {
+    scanner.dismiss(animated: true)
+    print("Document scanning failed with error: \(error.localizedDescription)")
+}
 }

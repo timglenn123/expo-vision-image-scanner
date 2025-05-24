@@ -10,6 +10,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		7DBE2AE8ED4BE83DE4578BE7 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37BD1581984A3E10B6B7AE4 /* ExpoModulesProvider.swift */; };
+		B2E633922DE27C4E002288D0 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E633912DE27C4E002288D0 /* SceneDelegate.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		CE3065BAD29764526ADE01F0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DEA307DDA554F30DEC82F664 /* PrivacyInfo.xcprivacy */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
@@ -22,6 +23,7 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = expovisionimagescannerexample/Info.plist; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = expovisionimagescannerexample/SplashScreen.storyboard; sourceTree = "<group>"; };
 		AC5B57B010E34948A7FDBB88 /* Pods-expovisionimagescannerexample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-expovisionimagescannerexample.debug.xcconfig"; path = "Target Support Files/Pods-expovisionimagescannerexample/Pods-expovisionimagescannerexample.debug.xcconfig"; sourceTree = "<group>"; };
+		B2E633912DE27C4E002288D0 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		B31BDE31CE73625CDE692289 /* Pods-expovisionimagescannerexample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-expovisionimagescannerexample.release.xcconfig"; path = "Target Support Files/Pods-expovisionimagescannerexample/Pods-expovisionimagescannerexample.release.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		BC533A7276D520B29FE0E7E0 /* libPods-expovisionimagescannerexample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-expovisionimagescannerexample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,6 +49,7 @@
 		13B07FAE1A68108700A75B9A /* expovisionimagescannerexample */ = {
 			isa = PBXGroup;
 			children = (
+				B2E633912DE27C4E002288D0 /* SceneDelegate.swift */,
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
 				F11748442D0722820044C1D9 /* expovisionimagescannerexample-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
@@ -317,6 +320,7 @@
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
 				7DBE2AE8ED4BE83DE4578BE7 /* ExpoModulesProvider.swift in Sources */,
+				B2E633922DE27C4E002288D0 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
