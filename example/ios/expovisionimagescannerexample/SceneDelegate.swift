@@ -1,6 +1,5 @@
 import UIKit
-import React
-import ReactAppDependencyProvider
+
 @available(iOS 13.0, *)
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 

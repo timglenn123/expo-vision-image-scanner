@@ -9,10 +9,13 @@ public class AppDelegate: ExpoAppDelegate {
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
   var reactNativeFactory: RCTReactNativeFactory?
 
-  public override func application(
+    public override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    // Call super first
+    let superResult = super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -21,15 +24,35 @@ public class AppDelegate: ExpoAppDelegate {
     reactNativeFactory = factory
     bindReactNativeFactory(factory)
 
+    // Only create window if not using scenes (iOS < 13 or scene delegate not available)
+    if #available(iOS 13.0, *) {
+      // iOS 13+ with scenes - window will be created by SceneDelegate
+    } else {
+      // iOS < 13 - use traditional app delegate window
 #if os(iOS) || os(tvOS)
-    window = UIWindow(frame: UIScreen.main.bounds)
-    factory.startReactNative(
-      withModuleName: "main",
-      in: window,
-      launchOptions: launchOptions)
+      self.window = UIWindow(frame: UIScreen.main.bounds)
+      self.window?.backgroundColor = UIColor.white
+      factory.startReactNative(
+        withModuleName: "main",
+        in: self.window,
+        launchOptions: launchOptions)
+      self.window?.makeKeyAndVisible()
 #endif
+    }
 
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    return superResult
+  }
+
+  // MARK: UISceneSession Lifecycle (iOS 13+)
+
+  @available(iOS 13.0, *)
+  public func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+    return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+  }
+
+  @available(iOS 13.0, *)
+  public func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+    // Called when the user discards a scene session.
   }
 
   // Linking API
