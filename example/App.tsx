@@ -30,11 +30,17 @@ export default function App() {
   };
 
   function handleScan(event: { nativeEvent: OnScanEvent; }): void {
-    //console.log('Scan result:', event.nativeEvent.data);
-    // Convert base64 to image source format
-    const data= JSON.parse(event.nativeEvent.data);
-    const processedImage= `data:image/png;base64,${data[0].imageUri}`;
-    setScannedImage(processedImage);
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (Array.isArray(data) && data[0]?.imageUri) {
+        const processedImage = `data:image/png;base64,${data[0].imageUri}`;
+        setScannedImage(processedImage);
+      } else {
+        console.error('Unexpected data format:', data);
+      }
+    } catch (error) {
+      console.error('Error parsing scan data:', error);
+    }
   }
 
   return (

@@ -9,4 +9,4 @@ declare class ExpoVisionImageScannerModule extends NativeModule<ExpoVisionImageS
 }
 
 // This call loads the native module object from the JSI.
-export default requireNativeModule<ExpoVisionImageScannerModule>('ExpoVisionImageScanner');
+export default requireNativeModule<ExpoVisionImageScannerModule>('ExpoVisionImageScannerView');

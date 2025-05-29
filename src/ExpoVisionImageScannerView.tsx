@@ -14,5 +14,5 @@ export type Props = {
 const NativeView: React.ComponentType<Props> = requireNativeViewManager('ExpoVisionImageScannerView');
 
 export default function ExpoVisionImageScannerView(props: Props) {
-  return <NativeView {...props} />;
+  return (<NativeView {...props} />);
 }
