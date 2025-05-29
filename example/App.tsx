@@ -1,15 +1,20 @@
 import { VisionView } from 'expo-vision-image-scanner';
 import { OnScanEvent } from 'expo-vision-image-scanner/ExpoVisionImageScannerView';
 import { useState } from 'react';
-import { View, Image, Button, StyleSheet } from 'react-native';
+import { View, Image, Button, StyleSheet, Text } from 'react-native';
 
 export default function App() {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: '#FFFFFF',
     },
     scanner: {
-      flex: 1,
+      width:450,
+      height: 1000,
+      top: 0,
+      left: 0,
+      backgroundColor: 'white',
     },
     resultContainer: {
       flex: 1,
@@ -21,6 +26,14 @@ export default function App() {
       width: '100%',
       height: '50%',
       marginBottom: 20,
+    },
+    text: {
+      color: '#FFF',
+      position: 'absolute',
+      bottom: 40,
+      left: 20,
+      right: 20,
+      textAlign: 'center',
     },
   });
   const [scannedImage, setScannedImage] = useState<string | null>(null);
@@ -46,7 +59,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       {!scannedImage ? (
-        <VisionView style={styles.scanner} onScan={handleScan} />
+        <VisionView enabled={false} style={styles.scanner} onScan={handleScan} />
       ) : (
         <View style={styles.resultContainer}>
           <Image
@@ -57,6 +70,9 @@ export default function App() {
           <Button title="Scan Again" onPress={handleReset} />
         </View>
       )}
+      <Text style={styles.text}>
+        The scanner view above is positioned with top: 100, left: 20
+      </Text>
     </View>
   );
 

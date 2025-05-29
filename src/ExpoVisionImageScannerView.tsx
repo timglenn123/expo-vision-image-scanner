@@ -8,7 +8,19 @@ export type OnScanEvent = {
 
 export type Props = {
   onScan?: (event: { nativeEvent: OnScanEvent }) => void;
-
+  enabled?: boolean;
+  style?: {
+    backgroundColor?: string;
+    borderRadius?: number;
+    borderWidth?: number;
+    borderColor?: string;
+    width?: number;
+    height?: number;
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+  };
 } & ViewProps;
 
 const NativeView: React.ComponentType<Props> = requireNativeViewManager('ExpoVisionImageScannerView');

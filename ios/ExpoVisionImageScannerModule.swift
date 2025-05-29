@@ -9,8 +9,13 @@ public class ExpoVisionImageScannerModule: Module {
             Events("onScan")
 
             Prop("enabled") { (view: ExpoVisionImageScannerView, enabled: Bool) in
-                    view.isEnabled = enabled
-                }
+                view.isEnabled = enabled
+            }
+
+           // Add style props
+           Prop("style") { (view: ExpoVisionImageScannerView, style: [String: Any]) in
+               view.style = style
+           }
             }
 
         }
