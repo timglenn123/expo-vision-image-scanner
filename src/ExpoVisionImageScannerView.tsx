@@ -6,16 +6,22 @@ export type OnScanEvent = {
   data: string;
 };
 
+export type OnCancelEvent = {
+  data: string;
+};
+
 export type Props = {
   onScan?: (event: { nativeEvent: OnScanEvent }) => void;
+  onCancel?: (event: { nativeEvent: OnCancelEvent }) => void;
+  onError?: (event: { nativeEvent: { error: string } }) => void;
   enabled?: boolean;
   style?: {
     backgroundColor?: string;
     borderRadius?: number;
     borderWidth?: number;
     borderColor?: string;
-    width?: number;
-    height?: number;
+    width?: string | number;
+    height?: string | number;
     top?: number;
     left?: number;
     right?: number;

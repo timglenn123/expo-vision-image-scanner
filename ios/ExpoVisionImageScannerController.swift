@@ -41,7 +41,7 @@ class ExpoVisionImageScannerController: UIViewController {
     private var autoButton: UIButton!
     private var captureButton: UIButton!
     private var counterLabel: UILabel!
-
+    private var bottomBar: UIView!
     private var isFlashOn = false
     private var isProcessing = false
 
@@ -78,23 +78,44 @@ class ExpoVisionImageScannerController: UIViewController {
         flashButton.tintColor = .white
         flashButton.addTarget(self, action: #selector(flashTapped), for: .touchUpInside)
 
-        // Capture button (bottom-center)
+        // Capture button (bottom-center) inside a black bar
+        bottomBar = UIView()
+        bottomBar.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+        bottomBar.translatesAutoresizingMaskIntoConstraints = false
+
+
         captureButton = UIButton(type: .custom)
         captureButton.backgroundColor = .white
         captureButton.layer.cornerRadius = 35
+        captureButton.layer.masksToBounds = true
         captureButton.layer.borderWidth = 4
-        captureButton.layer.borderColor = UIColor.white.cgColor
-        captureButton.addTarget(self, action: #selector(captureTapped), for: .touchUpInside)
+        captureButton.layer.borderColor = UIColor.lightGray.cgColor
 
-        // Counter label
-//        counterLabel = UILabel()
-//        counterLabel.text = "0/\(maxScans)"
-//        counterLabel.textColor = .white
-//        counterLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-//        counterLabel.textAlignment = .center
-//
+        // Add an inner circle to create a border effect
+        let borderCircle = UIView()
+        borderCircle.isUserInteractionEnabled = false
+        borderCircle.layer.cornerRadius = 35
+        borderCircle.layer.borderWidth = 4
+        borderCircle.layer.borderColor = UIColor.white.cgColor
+        borderCircle.backgroundColor = .clear
+        borderCircle.translatesAutoresizingMaskIntoConstraints = false
+        captureButton.addSubview(borderCircle)
+        NSLayoutConstraint.activate([
+            borderCircle.centerXAnchor.constraint(equalTo: captureButton.centerXAnchor),
+            borderCircle.centerYAnchor.constraint(equalTo: captureButton.centerYAnchor),
+            borderCircle.widthAnchor.constraint(equalTo: captureButton.widthAnchor),
+            borderCircle.heightAnchor.constraint(equalTo: captureButton.heightAnchor)
+        ])
+
+        captureButton.addTarget(self, action: #selector(captureTapped), for: .touchUpInside)
+        captureButton.translatesAutoresizingMaskIntoConstraints = false
+        bottomBar.addSubview(captureButton)
+
+
+
+
         // Add to view
-        [cancelButton, flashButton, captureButton].forEach {
+        [cancelButton, flashButton, bottomBar].forEach {
             $0?.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0!)
         }
@@ -114,13 +135,19 @@ class ExpoVisionImageScannerController: UIViewController {
             flashButton.widthAnchor.constraint(equalToConstant: 44),
             flashButton.heightAnchor.constraint(equalToConstant: 44),
 
-            // Capture button
-            captureButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-            captureButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            captureButton.widthAnchor.constraint(equalToConstant: 70),
-            captureButton.heightAnchor.constraint(equalToConstant: 70),
+            // Add bottomBar constraints
+            bottomBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bottomBar.heightAnchor.constraint(equalToConstant: 120),
 
-          ])
+            // Center captureButton horizontally in bottomBar
+            captureButton.centerXAnchor.constraint(equalTo: bottomBar.centerXAnchor),
+            captureButton.bottomAnchor.constraint(equalTo: bottomBar.bottomAnchor, constant: -28),
+            captureButton.widthAnchor.constraint(equalToConstant: 70),
+            captureButton.heightAnchor.constraint(equalToConstant: 70)
+
+        ])
     }
 
     private func setupCamera() {
@@ -164,7 +191,13 @@ class ExpoVisionImageScannerController: UIViewController {
         overlayLayer.strokeColor = UIColor.blue.cgColor
         overlayLayer.fillColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
         overlayLayer.lineWidth = 3
-        view.layer.addSublayer(overlayLayer)
+
+        // Insert overlayLayer below the bottomBar's layer
+        if let bottomBarLayer = view.subviews.last?.layer {
+            view.layer.insertSublayer(overlayLayer, below: bottomBarLayer)
+        } else {
+            view.layer.addSublayer(overlayLayer)
+        }
 
         // Grid layer for internal grid animation
         gridLayer = CAShapeLayer()
@@ -172,7 +205,13 @@ class ExpoVisionImageScannerController: UIViewController {
         gridLayer.fillColor = UIColor.clear.cgColor
         gridLayer.lineWidth = 1
         gridLayer.opacity = 0
-        view.layer.addSublayer(gridLayer)
+
+        // Insert gridLayer below the bottomBar's layer
+        if let bottomBarLayer = view.subviews.last?.layer {
+            view.layer.insertSublayer(gridLayer, below: bottomBarLayer)
+        } else {
+            view.layer.addSublayer(gridLayer)
+        }
     }
 
     private func startCamera() {
@@ -221,11 +260,11 @@ class ExpoVisionImageScannerController: UIViewController {
 
         photoOutput.capturePhoto(with: settings, delegate: self)
     }
-//
-//    private func updateCounter() {
-//        counterLabel.text = "\(scannedImages.count)/\(maxScans)"
-//    }
-//
+    //
+    //    private func updateCounter() {
+    //        counterLabel.text = "\(scannedImages.count)/\(maxScans)"
+    //    }
+    //
     private func showError(_ message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -346,7 +385,7 @@ extension ExpoVisionImageScannerController: AVCaptureVideoDataOutputSampleBuffer
 
         overlayLayer.add(animation, forKey: "pathAnimation")
         overlayLayer.path = path.cgPath
-    
+
         // If grid is active, update its path to follow the moving rectangle
         if detectionHighlighted {
             let gridPath = UIBezierPath()
@@ -355,9 +394,9 @@ extension ExpoVisionImageScannerController: AVCaptureVideoDataOutputSampleBuffer
             for i in 1..<subdivisions {
                 let t = CGFloat(i) / CGFloat(subdivisions)
                 let start = CGPoint(x: topLeft.x + (bottomLeft.x - topLeft.x) * t,
-                                     y: topLeft.y + (bottomLeft.y - topLeft.y) * t)
+                                    y: topLeft.y + (bottomLeft.y - topLeft.y) * t)
                 let end   = CGPoint(x: topRight.x + (bottomRight.x - topRight.x) * t,
-                                     y: topRight.y + (bottomRight.y - topRight.y) * t)
+                                    y: topRight.y + (bottomRight.y - topRight.y) * t)
                 gridPath.move(to: start)
                 gridPath.addLine(to: end)
             }
@@ -365,9 +404,9 @@ extension ExpoVisionImageScannerController: AVCaptureVideoDataOutputSampleBuffer
             for i in 1..<subdivisions {
                 let t = CGFloat(i) / CGFloat(subdivisions)
                 let start = CGPoint(x: topLeft.x + (topRight.x - topLeft.x) * t,
-                                     y: topLeft.y + (topRight.y - topLeft.y) * t)
+                                    y: topLeft.y + (topRight.y - topLeft.y) * t)
                 let end   = CGPoint(x: bottomLeft.x + (bottomRight.x - bottomLeft.x) * t,
-                                     y: bottomLeft.y + (bottomRight.y - bottomLeft.y) * t)
+                                    y: bottomLeft.y + (bottomRight.y - bottomLeft.y) * t)
                 gridPath.move(to: start)
                 gridPath.addLine(to: end)
             }
@@ -423,9 +462,9 @@ extension ExpoVisionImageScannerController: AVCaptureVideoDataOutputSampleBuffer
         for i in 1..<subdivisions {
             let t = CGFloat(i) / CGFloat(subdivisions)
             let start = CGPoint(x: tl.x + (bl.x - tl.x) * t,
-                                 y: tl.y + (bl.y - tl.y) * t)
+                                y: tl.y + (bl.y - tl.y) * t)
             let end   = CGPoint(x: tr.x + (br.x - tr.x) * t,
-                                 y: tr.y + (br.y - tr.y) * t)
+                                y: tr.y + (br.y - tr.y) * t)
             gridPath.move(to: start)
             gridPath.addLine(to: end)
         }
@@ -433,9 +472,9 @@ extension ExpoVisionImageScannerController: AVCaptureVideoDataOutputSampleBuffer
         for i in 1..<subdivisions {
             let t = CGFloat(i) / CGFloat(subdivisions)
             let start = CGPoint(x: tl.x + (tr.x - tl.x) * t,
-                                 y: tl.y + (tr.y - tl.y) * t)
+                                y: tl.y + (tr.y - tl.y) * t)
             let end   = CGPoint(x: bl.x + (br.x - bl.x) * t,
-                                 y: bl.y + (br.y - bl.y) * t)
+                                y: bl.y + (br.y - bl.y) * t)
             gridPath.move(to: start)
             gridPath.addLine(to: end)
         }
@@ -473,7 +512,7 @@ extension ExpoVisionImageScannerController: AVCapturePhotoCaptureDelegate {
                 self.captureButton.isEnabled = true
             }
         }
-    
+
         guard error == nil else {
             DispatchQueue.main.async {
                 self.showError("Failed to capture photo: \(error!.localizedDescription)")

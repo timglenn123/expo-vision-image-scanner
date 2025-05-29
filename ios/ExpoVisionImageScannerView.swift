@@ -5,11 +5,13 @@ class ExpoVisionImageScannerView: ExpoView, ExpoVisionImageScannerDelegate {
     // Make this weak to avoid retain cycle
     private weak var documentCameraViewController: ExpoVisionImageScannerController?
     let onScan = EventDispatcher()
-    var isEnabled = true
+    let onCancel: EventDispatcher = EventDispatcher()
+    let onError: EventDispatcher = EventDispatcher()
 
     required init(appContext: AppContext? = nil) {
         super.init(appContext: appContext)
         clipsToBounds = true
+
     }
 
     override func didMoveToWindow() {
@@ -91,12 +93,7 @@ class ExpoVisionImageScannerView: ExpoView, ExpoVisionImageScannerDelegate {
             "imageUri": images[0].pngData()?.base64EncodedString() ?? "",
             "pageIndex": 0
         ])
-        sendEvent(scannedItems)
-    }
-
-    func sendEvent(_ scannedItems: [[String: Any]]) {
-
-        // Convert to JSON and pass it to onScan
+           // Convert to JSON and pass it to onScan
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: scannedItems, options: .prettyPrinted)
             if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -106,8 +103,11 @@ class ExpoVisionImageScannerView: ExpoView, ExpoVisionImageScannerDelegate {
             print("Error serializing JSON: \(error)")
         }
     }
-      var style: [String: Any]? {
+
+
+    var style: [String: Any]? {
         didSet {
+            print("applying styles: \(String(describing: style))")
             applyStyles()
         }
     }
@@ -118,43 +118,82 @@ class ExpoVisionImageScannerView: ExpoView, ExpoVisionImageScannerDelegate {
             self.backgroundColor = backgroundColor
         }
 
-        // Apply size styles
-        if let width = style["width"] as? CGFloat {
-            self.frame.size.width = width
-        }
-        if let height = style["height"] as? CGFloat {
-            self.frame.size.height = height
-        }
+        print("inside applyStyles with style: \(style)")
 
-        // Apply position styles
-        if let top = style["top"] as? CGFloat {
-            self.frame.origin.y = top
-        }
-        if let left = style["left"] as? CGFloat {
-            self.frame.origin.x = left
-        }
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            var newFrame = self.frame
 
-        // Handle right position (relative to parent)
-        if let right = style["right"] as? CGFloat, let superview = self.superview {
-            self.frame.origin.x = superview.frame.width - self.frame.width - right
-        }
+            // Default to full screen if width/height not found
+            let screenBounds = UIScreen.main.bounds
 
-        // Handle bottom position (relative to parent)
-        if let bottom = style["bottom"] as? CGFloat, let superview = self.superview {
-            self.frame.origin.y = superview.frame.height - self.frame.height - bottom
-        }
+            // Height
+            if let heightValue = style["height"] {
+                if let height = heightValue as? CGFloat {
+                    newFrame.size.height = height
+                } else if let heightStr = heightValue as? String, heightStr.hasSuffix("%"),
+                          let percent = Double(heightStr.dropLast()),
+                          let superview = self.superview {
+                    newFrame.size.height = superview.frame.height * CGFloat(percent) / 100.0
+                }
+            } else {
+                newFrame.size.height = screenBounds.height
+            }
 
-        // Apply size to document camera view controller if present
-        if let documentVC = documentCameraViewController {
-            documentVC.view.frame = self.bounds
-            documentVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            // Width
+            if let widthValue = style["width"] {
+                if let width = widthValue as? CGFloat {
+                    newFrame.size.width = width
+                } else if let widthStr = widthValue as? String, widthStr.hasSuffix("%"),
+                          let percent = Double(widthStr.dropLast()),
+                          let superview = self.superview {
+                    newFrame.size.width = superview.frame.width * CGFloat(percent) / 100.0
+                }
+            } else {
+                newFrame.size.width = screenBounds.width
+            }
+
+            // Only update frame if it actually changed
+            if self.frame != newFrame {
+                self.frame = newFrame
+                self.setNeedsLayout()
+                self.layoutIfNeeded()
+            }
+            print(self.frame.size.width)
+            print(self.frame.size.height)
+
+            // Apply position styles
+            if let top = style["top"] as? CGFloat {
+                self.frame.origin.y = top
+            }
+            if let left = style["left"] as? CGFloat {
+                self.frame.origin.x = left
+            }
+
+            // Handle right position (relative to parent)
+            if let right = style["right"] as? CGFloat, let superview = self.superview {
+                self.frame.origin.x = superview.frame.width - self.frame.width - right
+            }
+
+            // Handle bottom position (relative to parent)
+            if let bottom = style["bottom"] as? CGFloat, let superview = self.superview {
+                self.frame.origin.y = superview.frame.height - self.frame.height - bottom
+            }
+
+            // Apply size to document camera view controller if present
+            if let documentVC = self.documentCameraViewController {
+                documentVC.view.frame = self.bounds
+                documentVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            }
         }
     }
     func documentScannerDidCancel(_ scanner: UIViewController){
         print("Document scanning canceled.")
+        onCancel(["data": "Document scanning canceled."])
 }
 
     func documentCameraViewController(_ scanner: UIViewController, didFailWithError error: Error) {
         print("Document scanning failed with error: \(error.localizedDescription)")
+        onError(["error": "Document scanning failed with error: \(error.localizedDescription)"])
 }
 }

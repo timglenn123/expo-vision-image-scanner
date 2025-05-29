@@ -7,9 +7,16 @@ public class ExpoVisionImageScannerModule: Module {
             // Make sure this name matches exactly with what's used in the JS side
             // Add your view props and events here
             Events("onScan")
-
+            Events("onCancel")
+            Events("onError")
             Prop("enabled") { (view: ExpoVisionImageScannerView, enabled: Bool) in
-                view.isEnabled = enabled
+                if(enabled) {
+
+                    view.isHidden = false
+                } else {
+
+                    view.isHidden = true
+                }
             }
 
            // Add style props
