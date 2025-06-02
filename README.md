@@ -2,11 +2,6 @@
 
 Use Vision Camera to Scan Documents
 
-# API documentation
-
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/vision-image-scanner/)
-- [Documentation for the main branch](https://docs.expo.dev/versions/unversioned/sdk/vision-image-scanner/)
-
 ## Usage
 
 ```jsx
