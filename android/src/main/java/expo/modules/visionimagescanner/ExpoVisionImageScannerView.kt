@@ -1,8 +1,9 @@
 package expo.modules.visionimagescanner
 
 import android.content.Context
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.graphics.Color
+import android.view.Gravity
+import android.widget.TextView
 import expo.modules.kotlin.AppContext
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
@@ -12,19 +13,19 @@ class ExpoVisionImageScannerView(context: Context, appContext: AppContext) : Exp
   // The name of the event is inferred from the value and needs to match the event name defined in the module.
   private val onLoad by EventDispatcher()
 
-  // Defines a WebView that will be used as the root subview.
-  internal val webView = WebView(context).apply {
+  // Defines a TextView that will display "Coming Soon" in black text.
+  internal val textView = TextView(context).apply {
     layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-    webViewClient = object : WebViewClient() {
-      override fun onPageFinished(view: WebView, url: String) {
-        // Sends an event to JavaScript. Triggers a callback defined on the view component in JavaScript.
-        onLoad(mapOf("url" to url))
-      }
-    }
+    text = "Coming Soon"
+    textSize = 24f
+    setTextColor(Color.WHITE)
+    gravity = Gravity.CENTER
   }
 
   init {
-    // Adds the WebView to the view hierarchy.
-    addView(webView)
+    // Adds the TextView to the view hierarchy.
+    addView(textView)
+    // Trigger the onLoad event immediately since we're not loading anything
+    onLoad(mapOf("message" to "Coming Soon view loaded"))
   }
 }

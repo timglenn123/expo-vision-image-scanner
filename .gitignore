@@ -59,3 +59,4 @@ yarn-error.log
 #Example
 example/.build
 example/node_modules
+example/ios/expovisionimagescannerexample.xcodeproj/project.pbxproj
