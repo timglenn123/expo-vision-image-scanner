@@ -2,24 +2,17 @@
 
 Use Vision Camera to Scan Documents
 
-# API documentation
-
-- [Documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/vision-image-scanner/)
-- [Documentation for the main branch](https://docs.expo.dev/versions/unversioned/sdk/vision-image-scanner/)
-
 ## Usage
 
 ```jsx
-import { ExpoVisionImageScannerView } from 'expo-vision-image-scanner';
+import { VisionView } from 'expo-vision-image-scanner';
 
 export default function App() {
   return (
-    <ExpoVisionImageScannerView
+    <VisionView
       style={{
-        width: 300,
-        height: 400,
-        top: 100,
-        left: 20,
+        width: '100%',
+        height: '100%'
       }}
       onScan={(event) => {
         console.log('Scanned document:', event.data);
