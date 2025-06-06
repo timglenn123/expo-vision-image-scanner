@@ -2,6 +2,7 @@
 
 Use Vision Camera to Scan Documents
 
+# IOS Only - Android Coming Soon
 ## Usage
 
 ```jsx
